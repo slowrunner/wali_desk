@@ -26,7 +26,7 @@ sudo apt update
 sudo apt upgrade -y
 
 # === Install ROS2 Humble Hawksbill desktop packages
-sudo apt install -y ros-humble-ros-desktop
+sudo apt install -y ros-humble-desktop
 
 # === Install ROS 2 Compilers and tools to build packages
 sudo apt install -y ros-dev-tools
@@ -44,8 +44,8 @@ echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 echo "export ROS_DOMAIN_ID=0" >> ~/.bashrc
 
 # === Install build environment
-sudo apt install -y build-essential
-pip3 install setuptools==58.2.0
+# sudo apt install -y build-essential
+# pip3 install setuptools==58.2.0
 
 # (does transforms3d need sudo pip3 ?)
 pip3 install transforms3d
