@@ -1,8 +1,8 @@
 #/bin/bash
 
 echo "INITIAL CREATE3 SIM SETUP"
-echo "Creating create3_sim_ws/src"
-# mkdir -p ~/create3desktop/create3_sim_ws/src
+echo "Creating ~/wali_desk/c3ws/src"
+mkdir -p ~/wali_desk/c3ws/src
 
 echo "Cloning create3 sim repo to wali_desk/c3ws/src"
 cd ~/wali_desk/c3ws/src
