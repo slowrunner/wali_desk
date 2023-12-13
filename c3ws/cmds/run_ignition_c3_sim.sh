@@ -2,8 +2,9 @@
 
 echo "Starting Create3 Sim in Ignition"
 cd ~/wali_desk/c3ws
-source install/local_setup.bash
-
+if [ -e install/local_setup.bash ]; then
+  source install/local_setup.bash
+fi
 
 ros2 launch irobot_create_ignition_bringup create3_ignition.launch.py
 
