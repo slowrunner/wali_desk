@@ -126,7 +126,7 @@ import datetime as dt
 
 DEBUG = False
 # Uncomment for debug prints to console
-# DEBUG = True
+DEBUG = True
 
 LIFELOGFILE = "/home/ubuntu/life.log"
 
@@ -241,56 +241,43 @@ class VelPwrTest(Node):
           dtstr = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
           print(dtstr, printMsg)
 
-
-  def undock_action_send_goal(self):
-    undock_msg = Undock.Goal()
+  # #################### NAVIGATE TO POSITION #####################
+  def navigate_to_position_action_send_goal(self,goal,speed):
+    navigate_to_position_msg = navigate_to_position.Goal()
     if DEBUG:
-      printMsg = "undock_action_send_goal(): executing"
+      printMsg = "navigate_to_position_action_send_goal({:.2f}m/s): executing".format(speed)
       print(printMsg)
-    self._undock_action_client.wait_for_server()
-    self._undock_action_send_goal_future = self._undock_action_client.send_goal_async(undock_msg)
-    self._undock_action_send_goal_future.add_done_callback(self.undock_goal_response_callback)
+    self._navigate_to_position_action_client.wait_for_server()
+    self._navigate_to_position_action_send_goal_future = self._navigate_to_position_action_client.send_goal_async(navigate_to_position_msg)
+    self._navigate_to_position_action_send_goal_future.add_done_callback(self.navigate_to_position_goal_response_callback)
 
-  def undock_goal_response_callback(self, future):
+  def navigate_to_position_goal_response_callback(self, future):
     goal_handle = future.result()
     if DEBUG:
       dtstr = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-      printMsg = "undock_goal_response_callback(): Goal Accepted: {}".format(goal_handle.accepted)
+      printMsg = "navigate_to_position_goal_response_callback(): Goal Accepted: {}".format(goal_handle.accepted)
       print(dtstr,printMsg)
 
     if not goal_handle.accepted:
-      self.get_logger().info('Undock Goal Rejected :(')
+      self.get_logger().info('navigate_to_position Goal Rejected :(')
       return
 
-    self.get_logger().info('Undock Goal Accepted :)')
+    self.get_logger().info('navigate_to_position Goal Accepted :)')
+    self.state = "nav_to_goal"
+    self._get_navigate_to_position_result_future = goal_handle.get_result_async()
+    self._get_navigate_to_position_result_future.add_done_callback(self.get_navigate_to_position_result_callback)
 
-    self._get_undock_result_future = goal_handle.get_result_async()
-    self._get_undock_result_future.add_done_callback(self.get_undock_result_callback)
-
-  def get_undock_result_callback(self, future):
+  def get_navigate_to_position_result_callback(self, future):
     result = future.result().result
+    self.state = "at_goal"
+    printMsg = "** WaLI nav_to_pos: at_goal result x: {:.3f} y: {:.3f} **".format(result.pose.x, result.pose.y)
     if DEBUG:
-      dtstr = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-      printMsg = "get_undock_result_callback(): Undock Result is_docked {} %".format(result.is_docked)
-      print(dtstr, printMsg)
-
-    if result.is_docked:
-      self.state = "docked"
-      printMsg = "** WaLI Undocking: failed **"
-      if DEBUG:
           dtstr = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
           print(dtstr, printMsg)
-      self.lifeLog.info(printMsg)
-
-    else:
-      self.state = "undocked"
-      printMsg = "** WaLI Undocking: success at battery {:.0f}% **".format(self.battery_percentage*100)
-      self.lifeLog.info(printMsg)
-      if DEBUG:
-          dtstr = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-          print(dtstr, printMsg)
+    self.lifeLog.info(printMsg)
 
 
+  # ############################# DOCK ACTION #############################
 
   def dock_action_send_goal(self):
     dock_msg = DockServo.Goal()
@@ -360,7 +347,7 @@ class VelPwrTest(Node):
           print(dtstr, printMsg)
 
 
-
+  # ################## ROTATE ANGLE #################################
 
   def rotate_angle_action_send_goal(self,angle):
     rotate_angle_msg = RotateAngle.Goal()
@@ -401,21 +388,29 @@ class VelPwrTest(Node):
     # self.get_logger().info('Result: {0}'.format(result))
 
 
-
+  # ################# MAIN CALL BACK #################################
 
   def wali_main_cb(self):
     try:
       if DEBUG:
         dtstr = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        printMsg = "wali_main_cb(): executing"
+        printMsg = "vel_pwr_test_main_cb(): executing"
         print(dtstr, printMsg)
-        printMsg = "wali_main_cb(): wali.state = {}".format(self.state)
+        printMsg = "vel_pwr_test_main_cb(): wali.state = {}".format(self.state)
         print(dtstr, printMsg)
 
       # WaLI logic
       # publishes /undock action goal when BatteryState.percentage at or near full (and state="docked")
       # publishes /rotate_angle {angle: 1.57} (180deg) when BatteryState.percentage low
       # publishes /dock action goal when BatteryState.percentage very low
+      #
+      # OTHERWISE 
+      #      speed = speed_list[loopcount]
+      #      goal_position = goal_position_list[loop_count % 2]
+      #      call NavigateToPosition action goal with speed and goal_position
+      #      wait for state = at_goal
+      #        log goal complete, ave volt, ave current, total power, drive_power
+      
 
       if (self.battery_percentage > UNDOCK_AT_PERCENTAGE) and (self.state in ["docked","init"]):
         self.state = "undocking"
@@ -442,15 +437,25 @@ class VelPwrTest(Node):
            print(dtstr, printMsg)
         self.dock_action_send_goal()
 
+      elif (self.state in ["undocked","at_goal"]):
+        if DEBUG:
+           dtstr = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+           printMsg = "wali_main_cb(): loop count {} % sending nav_to_pos action goal".format(self.loop_count)
+           print(dtstr, printMsg)
+        # self.dock_action_send_goal()
+        self.loop_count += 1
+
+
     except Exception as e:
         print("wali_main_cb(): Exception:",str(e))
         traceback.print_exc(file=sys.stdout)
         sys.exit(1)
 
-
+# ################### MAIN ###############################
 def main():
   rclpy.init(args=None)
   vel_pwr_test = VelPwrTest()
+  vel_pwr_test.loop_count = 0
   try:
     rclpy.spin(vel_pwr_test)
   except KeyboardInterrupt:
