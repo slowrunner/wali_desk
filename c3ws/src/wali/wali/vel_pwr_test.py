@@ -118,6 +118,8 @@ from irobot_create_msgs.action import Undock      # no parms, result: is_docked:
 # from irobot_create_msgs.msg import DockStatus  # docked: true,false
 from irobot_create_msgs.action import DockServo
 from irobot_create_msgs.action import RotateAngle  # angle: float32, max_rotation_speed: float32 (1.9r/s), result: pose, Feedback: remaining_angle_travel: float32
+from irobot_create_msgs.action import NavigateToPosition # goal_pose, achieve_goal_heading: bool, max_translation_speed: float32, max_rotation_speed: float32
+from geometry_msgs.msg import PoseStamped
 
 import sys
 import traceback
@@ -173,7 +175,11 @@ class VelPwrTest(Node):
     self._rotate_angle_action_client = ActionClient(self, RotateAngle, 'rotate_angle')
     self._navigate_to_position_action_client = ActionClient(self, NavigateToPosition, 'navigate_to_position')
 
-    period_for_timer = 300.0  # Once every 5 minutes
+    if DEBUG:
+      period_for_timer = 60.0  # Once every 5 minutes
+    else:
+      period_for_timer = 300.0  # Once every 5 minutes
+
     self.timer = self.create_timer( period_for_timer, self.wali_main_cb)  # call the vel_pwr_test's main loop when ROS timer triggers
     if DEBUG:
         dtstr = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -244,9 +250,21 @@ class VelPwrTest(Node):
   # #################### NAVIGATE TO POSITION #####################
   def navigate_to_position_action_send_goal(self,goal,speed):
     navigate_to_position_msg = navigate_to_position.Goal()
+    navigate_to_position_msg.goal_pose = PoseStamped()
+    navigate_to_position_msg.goal_pose.header.seq = 1
+    navigate_to_position_msg.goal_pose.header.stamp = self.get_clock().now().to_msg()
+    navigate_to_position_msg.goal_pose.position.x = 0.100
+    navigate_to_position_msg.goal_pose.position.y = 0.500
+    navigate_to_position_msg.achieve_goal_heading = false
+    navigate_to_position_msg.max_translation_speed = speed
+    navigate_to_position_msg.max_rotation_speed = 1.0
+
+
+
     if DEBUG:
       printMsg = "navigate_to_position_action_send_goal({:.2f}m/s): executing".format(speed)
       print(printMsg)
+    self.state = "at_goal"
     self._navigate_to_position_action_client.wait_for_server()
     self._navigate_to_position_action_send_goal_future = self._navigate_to_position_action_client.send_goal_async(navigate_to_position_msg)
     self._navigate_to_position_action_send_goal_future.add_done_callback(self.navigate_to_position_goal_response_callback)
@@ -437,12 +455,14 @@ class VelPwrTest(Node):
            print(dtstr, printMsg)
         self.dock_action_send_goal()
 
-      elif (self.state in ["undocked","at_goal"]):
+      elif (self.state in ["init", "undocked","at_goal"]):
         if DEBUG:
            dtstr = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
            printMsg = "wali_main_cb(): loop count {} % sending nav_to_pos action goal".format(self.loop_count)
            print(dtstr, printMsg)
-        # self.dock_action_send_goal()
+        goal=[0,0.300]
+        speed = 0.1
+        self.navigate_to_position_action_send_goal(goal,speed)
         self.loop_count += 1
 
 

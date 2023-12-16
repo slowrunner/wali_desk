@@ -4,7 +4,7 @@ package_name = 'wali'
 
 setup(
     name=package_name,
-    version='0.0.1',
+    version='0.0.2',
     packages=[package_name],
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'wali_node = wali.wali_node:main',
+            'vel_pwr_test = wali.vel_pwr_test:main',
             'battery_sub = wali.battery_sub:main'
         ],
     },
