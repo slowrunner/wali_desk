@@ -96,7 +96,7 @@ DEBUG = False
 LIFELOGFILE = "/home/ubuntu/life.log"
 
 UNDOCK_AT_PERCENTAGE = 0.995
-ROTATE_AT_PERCENTAGE = 0.20
+ROTATE_AT_PERCENTAGE = 0.18
 DOCK_AT_PERCENTAGE   = 0.15
 
 
@@ -113,7 +113,7 @@ class WaLINode(Node):
     self.loghandler.setFormatter(self.logformatter)
     self.lifeLog.addHandler(self.loghandler)
 
-    printMsg = '** WaLI node started **'
+    printMsg = '** WaLI node started - Dock below {:2d}% **'.format( int(DOCK_AT_PERCENTAGE * 100) )
     print(printMsg)
     self.lifeLog.info(printMsg)
 
@@ -145,7 +145,6 @@ class WaLINode(Node):
         print(dtstr,printMsg)
     self.battery_percentage = -1.0
     self.state = "init"
-    # self.state = "ready2dock"   # for testing docking
 
 
   def battery_state_sub_callback(self,battery_state_msg):
@@ -308,13 +307,10 @@ class WaLINode(Node):
     if DEBUG:
       printMsg = "get_rotate_angle_result_callback(): rotate Result {} %".format(result)
       print(printMsg)
-    # if result.is_rotateed:
-    #    self.state = "ready2dock"
-    # else:
-    #  # do not change WaLI state
-    #  pass
-    # self.get_logger().info('Result: {0}'.format(result))
 
+    printMsg = "** WaLI Ready To Dock at battery {:.0f}% **".format(self.battery_percentage*100)
+    self.lifeLog.info(printMsg)
+    self.state = "ready2dock"
 
 
 
