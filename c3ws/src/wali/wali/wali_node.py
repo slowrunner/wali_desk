@@ -304,14 +304,17 @@ class WaLINode(Node):
 
   def get_rotate_angle_result_callback(self, future):
     result = future.result().result
+    status = future.result().status
     if DEBUG:
-      printMsg = "get_rotate_angle_result_callback(): rotate Result {} %".format(result)
+      printMsg = "get_rotate_angle_result_callback(): rotate Status {} Result {} ".format(status, result)
       print(printMsg)
-
-    printMsg = "** WaLI Ready To Dock at battery {:.0f}% **".format(self.battery_percentage*100)
-    self.lifeLog.info(printMsg)
-    self.state = "ready2dock"
-
+    if status == GoalStatus.STATUS_SUCCEEDED:
+      printMsg = "** WaLI Ready To Dock at battery {:.0f}% **".format(self.battery_percentage*100)
+      self.lifeLog.info(printMsg)
+      self.state = "ready2dock"
+    else:
+      printMsg = "** Rotate Angle Goal failed with status: {}'.format(status)
+      self.lifeLog.info(printMsg)
 
 
   def wali_main_cb(self):
@@ -342,8 +345,10 @@ class WaLINode(Node):
            dtstr = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
            printMsg = "wali_main_cb(): battery_percentage {:.0} % sending rotate180 action goal".format(self.battery_percentage)
            print(dtstr, printMsg)
+
+        # TODO: change this to NavigateToPosition facing dock
         self.rotate_angle_action_send_goal(angle=math.pi)    # pi=180 deg
-        self.state = "ready2dock"
+
 
       elif (self.battery_percentage < DOCK_AT_PERCENTAGE) and (self.state in ["ready2dock"]):
         self.state = "docking"
