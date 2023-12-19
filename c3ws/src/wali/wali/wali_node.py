@@ -313,7 +313,7 @@ class WaLINode(Node):
       self.lifeLog.info(printMsg)
       self.state = "ready2dock"
     else:
-      printMsg = "** Rotate Angle Goal failed with status: {}'.format(status)
+      printMsg = "** Rotate Angle Goal failed with status: {}".format(status)
       self.lifeLog.info(printMsg)
 
 
