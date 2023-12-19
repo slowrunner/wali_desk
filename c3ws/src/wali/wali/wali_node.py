@@ -45,6 +45,7 @@
       # Feedback
 
     - irobot_create_msgs/action/DockServo
+    - irobot_create_msgs/action/Dock
       # Request
       ---
       # Result
@@ -81,7 +82,8 @@ from rclpy.time import Time
 from sensor_msgs.msg import BatteryState       # percentage: 0.0 - 1.0
 from irobot_create_msgs.action import Undock      # no parms, result: is_docked: true,false
 # from irobot_create_msgs.msg import DockStatus  # docked: true,false
-from irobot_create_msgs.action import DockServo
+#from irobot_create_msgs.action import DockServo
+from irobot_create_msgs.action import Dock
 from irobot_create_msgs.action import RotateAngle  # angle: float32, max_rotation_speed: float32 (1.9r/s), result: pose, Feedback: remaining_angle_travel: float32
 
 import sys
@@ -134,7 +136,8 @@ class WaLINode(Node):
     self.battery_state = None
 
     self._undock_action_client = ActionClient(self, Undock, 'undock')
-    self._dock_action_client = ActionClient(self, DockServo, 'dock')  # the "dock" action server requires a DockServo.action msg
+    # self._dock_action_client = ActionClient(self, DockServo, 'dock')  # the "dock" action server requires a DockServo.action msg
+    self._dock_action_client = ActionClient(self, Dock, 'dock')  # the "dock" action server requires a Dock.action msg
     self._rotate_angle_action_client = ActionClient(self, RotateAngle, 'rotate_angle')
 
     period_for_timer = 60.0  # Once every 60 seconds
@@ -207,7 +210,8 @@ class WaLINode(Node):
 
 
   def dock_action_send_goal(self):
-    dock_msg = DockServo.Goal()
+    # dock_msg = DockServo.Goal()
+    dock_msg = Dock.Goal()
     if DEBUG:
       dtstr = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
       printMsg = "dock_action_send_goal(): executing"

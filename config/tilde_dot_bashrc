@@ -1,0 +1,4 @@
+source /opt/ros/humble/setup.bash
+source /usr/share/colcon_cd/function/colcon_cd.sh
+source ~/wali_desk/c3ws/install/setup.bash
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
