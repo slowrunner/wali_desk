@@ -14,8 +14,12 @@ import numpy as np
 LABELS = ["side_left", "left", "front_left", "front_center_left", \
               "front_center_right", "front_right", "right"]
 
-# Approximate distance within range of 1cm to 60cm (less or more undefined)
-DISTANCES = [0.520, 0.420, 0.320, 0.220, 0.120, 0.070, 0.045, 0.035]
+# Tested with front surface of white baseboard 60mm floor to edge of dado
+
+# Approximate distance from wall to bumper at range of 1.5cm to 50cm
+DISTANCES = [0.500, 0.400, 0.300, 0.200, 0.110, 0.050, 0.025, 0.015]
+
+# Note Distance base_link to Bumper is 0.171 meter
 
 # Average Reading Values For Distances
 READINGS  = [
@@ -23,9 +27,9 @@ READINGS  = [
              [17    , 21   , 35   ,  74   , 322  , 1252  , 3090 , 3481],
              [31    , 44   , 53   , 112   , 366  , 1162  , 2639 , 3412],
              [13    , 23   , 42   , 126   , 451  , 1385  , 2843 , 3514],
-             [13    , 23   , 42   , 126   , 451  , 1385  , 2843 , 3514],
-             [13    , 23   , 42   , 126   , 451  , 1385  , 2843 , 3514],
-             [13    , 23   , 42   , 126   , 451  , 1385  , 2843 , 3514],
+             [24    , 30   , 44   ,  94   , 353  , 1281  , 3118 , 3769],
+             [14    , 24   , 38   ,  81   , 276  , 1176  , 2972 , 3745],
+             [17    , 21   , 35   ,  88   , 410  , 1635  , 3596 , 3784],
             ]
 
 def dist_ir_reading(sensor_idx, reading):
