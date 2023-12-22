@@ -11,22 +11,32 @@
 import numpy as np
 
 
+LABELS = ["side_left", "left", "front_left", "front_center_left", \
+              "front_center_right", "front_right", "right"]
+
 # Approximate distance within range of 1cm to 60cm (less or more undefined)
-DISTANCES = [0.600, 0.500, 0.400, 0.300, 0.200, 0.100, 0.050, 0.025, 0.010]
+DISTANCES = [0.520, 0.420, 0.320, 0.220, 0.120, 0.070, 0.045, 0.035]
 
-# Readings are average of 20 readings at distances
-READINGS  = [8    , 13   , 38   , 76   , 151  , 580  , 2044 , 3772 , 3798 ]
+# Average Reading Values For Distances
+READINGS  = [
+             [ 9    , 14   , 19   ,  73   , 336  , 1148  , 2469 , 3111],
+             [17    , 21   , 35   ,  74   , 322  , 1252  , 3090 , 3481],
+             [31    , 44   , 53   , 112   , 366  , 1162  , 2639 , 3412],
+             [13    , 23   , 42   , 126   , 451  , 1385  , 2843 , 3514],
+             [13    , 23   , 42   , 126   , 451  , 1385  , 2843 , 3514],
+             [13    , 23   , 42   , 126   , 451  , 1385  , 2843 , 3514],
+             [13    , 23   , 42   , 126   , 451  , 1385  , 2843 , 3514],
+            ]
 
-
-def dist_ir_reading(reading):
-      UNDEF = -99.0
-      dist = np.interp(reading,READINGS,DISTANCES, right=UNDEF, left=UNDEF)
+def dist_ir_reading(sensor_idx, reading):
+      UNDEF = -99.999
+      dist = np.interp(reading,READINGS[sensor_idx],DISTANCES, right=UNDEF, left=UNDEF)
       return dist
 
 def main():
 
   for reading in [0, 8, 10, 13, 25, 38, 57, 76, 114, 151, 366, 580, 1312, 2044, 2908, 3772, 3785, 3798, 4500] :
-    print("reading: {}  dist: {:.3f} m".format(reading, dist_ir_reading(reading)))
+    print("reading: {}  dist: {:.3f} m".format(reading, dist_ir_reading(4,reading)))
 
 
 if __name__ == "__main__":

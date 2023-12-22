@@ -85,7 +85,7 @@ class IRSubscriber(Node):
         print('\nCreate3 IR sensor:')
         for reading in msg.readings: 
         	val = reading.value
-        	dist = create3_ir_dist.dist_ir_reading(val)
+        	dist = create3_ir_dist.dist_ir_reading(label_idx,val)
         	label = labels[label_idx]
         	print("{:<20} intensity: {:>5} dist: {:>-8.3f}m".format(label,str(val),dist) )
         	label_idx += 1
