@@ -12,7 +12,8 @@ setup(
         ('share/' + package_name, ['package.xml']),
         ('lib/' + package_name, [package_name+'/create3_ir_dist.py']),
     ],
-    install_requires=['setuptools'],
+    # install_requires=['setuptools'],
+    install_requires=[],
     zip_safe=True,
     maintainer='ubuntu',
     maintainer_email='slowrunner@users.noreply.github.com',
@@ -24,7 +25,8 @@ setup(
             'wali_node = wali.wali_node:main',
             'vel_pwr_test = wali.vel_pwr_test:main',
             'battery_sub = wali.battery_sub:main',
-            'sub_ir = wali.sub_ir:main'
+            'sub_ir = wali.sub_ir:main',
+            'ir2scan = wali.create3_ir2scan:main'
         ],
     },
 )
