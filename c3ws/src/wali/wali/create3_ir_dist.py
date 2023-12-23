@@ -16,20 +16,20 @@ LABELS = ["side_left", "left", "front_left", "front_center_left", \
 
 # Tested with front surface of white baseboard 60mm floor to edge of dado
 
-# Approximate distance from wall to bumper at range of 1.5cm to 50cm
-DISTANCES = [0.500, 0.400, 0.300, 0.200, 0.110, 0.050, 0.025, 0.015]
+# Approximate distance from wall to bumper at range of 1.5cm to 40cm
+DISTANCES = [ 0.400, 0.300, 0.200, 0.110, 0.050, 0.025, 0.015]
 
 # Note Distance base_link to Bumper is 0.171 meter
 
-# Average Reading Values For Distances (0.5m is 0.4m reading-1)
+# Average Reading Values For Distances
 READINGS  = [
-             [13    , 14   , 19   ,  73   , 336  , 1148  , 2469 , 3111],
-             [20    , 21   , 35   ,  74   , 322  , 1252  , 3090 , 3481],
-             [43    , 44   , 53   , 112   , 366  , 1162  , 2639 , 3412],
-             [22    , 23   , 42   , 126   , 451  , 1385  , 2843 , 3514],
-             [29    , 30   , 44   ,  94   , 353  , 1281  , 3118 , 3769],
-             [23    , 24   , 38   ,  81   , 276  , 1176  , 2972 , 3745],
-             [20    , 21   , 35   ,  88   , 410  , 1635  , 3596 , 3784],
+             [14   , 19   ,  73   , 336  , 1148  , 2469 , 3111],
+             [21   , 35   ,  74   , 322  , 1252  , 3090 , 3481],
+             [44   , 53   , 112   , 366  , 1162  , 2639 , 3412],
+             [23   , 42   , 126   , 451  , 1385  , 2843 , 3514],
+             [30   , 44   ,  94   , 353  , 1281  , 3118 , 3769],
+             [24   , 38   ,  81   , 276  , 1176  , 2972 , 3745],
+             [21   , 35   ,  88   , 410  , 1635  , 3596 , 3784],
             ]
 
 def dist_ir_reading(sensor_idx, reading):
