@@ -34,7 +34,7 @@
                       float32[]       ranges           # range data [m]
                       float32[]       intensities      # (optional)
 
-  Uses:  
+  Uses:  create3_ir_dist.py
 
 """
 
@@ -43,6 +43,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 from irobot_create_msgs.msg import IrIntensityVector
+import create3_ir_dist
 
 '''
 Namespace for robot 
@@ -59,20 +60,83 @@ from rclpy.qos import qos_profile_sensor_data
 
 
 
+def printIR(msg):
+    '''
+      print reading value and (estimated) distance of seven Create3 IR sensors from /ir_intensity topic
+      :type msg: IrIntensity
+    '''
+
+    labels = ["side_left", "left", "front_left", "front_center_left", "front_center_right", "front_right", "right"]
+    label_idx = 0
+    print('\nCreate3 IR sensor:')
+    for reading in msg.readings: 
+        	val = reading.value
+        	dist = create3_ir_dist.dist_ir_reading(label_idx,val)
+        	label = labels[label_idx]
+        	print("{:<20} intensity: {:>5} dist: {:>-8.3f}m".format(label,str(val),dist) )
+        	label_idx += 1
+
+SCAN_TOPIC_HZ = 20              # Publish Scan Topic NN times per second
+SCAN_TOPIC_PERIOD = 1.0/SCAN_TOPIC_HZ
+
+ANGLE_MIN = -1.1344640138       # -65 degrees
+ANGLE_MAX =  1.1344640138       # +65 degrees
+ANGLE_INCREMENT = 0.0174532925  # 1 degree
+RANGE_MIN = 0.015
+RANGE_MAX = 0.400
+
 class IR2Scan_Node(Node):
 
     def __init__(self):
         super().__init__('ir2scan')
+
+        # SUBSCRIBE to /ir_intensity topics
         self.subscription = self.create_subscription(
             IrIntensityVector,
             namespace + '/ir_intensity',
             self.ir_intensity_sub_callback,
             qos_profile_sensor_data)
         self.subscription  # prevent unused variable warning
+        # rolling counter of ir_intensity msgs received from 62 Hz topic for debugging
+        self.ir_intensity_counter = 0
+        self.ir_intensity_vector = IrIntensityVector()
+
+        # PUBLISH to /scan topic with LaserScan msg type
+        self.scan_pub_timer = self.create_timer(SCAN_TOPIC_PERIOD, self.scan_timer_callback)
+
+        self.publisher = self.create_publisher(
+            LaserScan,
+            namespace + '/scan',
+            qos_profile_sensor_data)
+        self.scan_msg = LaserScan( 
+            angle_min=ANGLE_MIN, 
+            angle_max=ANGLE_MAX, 
+            angle_increment=ANGLE_INCREMENT,
+            time_increment=0.0,
+            scan_time=SCAN_TOPIC_PERIOD,
+            range_min=RANGE_MIN,
+            range_max=RANGE_MAX,
+            ranges=[0.0]*131
+            )
+
 
     def ir_intensity_sub_callback(self, msg:IrIntensityVector):
-        self.get_logger().info('ir_intensities: {}'.format(msg))
+        # self.get_logger().info('ir_intensities: {}'.format(msg))
         self.ir_intensity_vector = msg  # readings[].value
+
+        if DEBUG:
+            # increment/roll msg counter to print only once per second
+            if (self.ir_intensity_counter == 0):
+                printIR(self.ir_intensity_vector)
+            self.ir_intensity_counter = (self.ir_intensity_counter + 1) % 62
+
+
+    def scan_timer_callback(self):
+            # if DEBUG:  self.get_logger().info('Readings: {}'.format(self.ir_intensity_vector))
+            # self.scan_msg.ranges = self.ir_intensity_vector.readings
+            self.publisher.publish(self.scan_msg)
+            # if DEBUG:  self.get_logger().info('Published /scan: {}'.format(self.scan_msg))
+
 
 
 def main(args=None):
