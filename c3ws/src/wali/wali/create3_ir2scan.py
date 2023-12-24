@@ -81,7 +81,7 @@ SCAN_TOPIC_HZ = 20              # Publish Scan Topic NN times per second
 SCAN_TOPIC_PERIOD = 1.0/SCAN_TOPIC_HZ
 
 ANGLE_MIN =  -1.1344640138        # -65 degrees   65 deg ccw from front
-ANGLE_MAX =   1.1344640138       # -245 degrees  65 deg  cw from front
+ANGLE_MAX =   1.1344640138        # +65 degrees   65 deg  cw from front
 ANGLE_INCREMENT = 0.0174532925  # 1 degree
 RANGE_MIN = 0.015
 RANGE_MAX = 0.400
