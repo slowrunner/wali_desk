@@ -53,7 +53,7 @@ namespace = ''
 
 DEBUG = False
 # Uncomment for debug prints to console
-DEBUG = True
+# DEBUG = True
 
 # pick one of the following qos profile methods - explicit or named profile
 # from rclpy.qos import ReliabilityPolicy, QoSProfile
