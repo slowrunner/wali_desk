@@ -42,6 +42,7 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
+from std_msgs.msg import Header
 from irobot_create_msgs.msg import IrIntensityVector
 import create3_ir_dist
 
@@ -79,11 +80,14 @@ def printIR(msg):
 SCAN_TOPIC_HZ = 20              # Publish Scan Topic NN times per second
 SCAN_TOPIC_PERIOD = 1.0/SCAN_TOPIC_HZ
 
-ANGLE_MIN = -1.1344640138       # -65 degrees
-ANGLE_MAX =  1.1344640138       # +65 degrees
+ANGLE_MIN =  -1.1344640138        # -65 degrees   65 deg ccw from front
+ANGLE_MAX =   1.1344640138       # -245 degrees  65 deg  cw from front
 ANGLE_INCREMENT = 0.0174532925  # 1 degree
 RANGE_MIN = 0.015
 RANGE_MAX = 0.400
+IR_SENSOR_LABELS = ["side_left", "left", "front_left", "front_center_left", "front_center_right", "front_right", "right"]
+IR_SENSOR_RANGES_INDEX = [130  ,   99  ,      79     ,        62          ,       45            ,     27       ,     0  ]
+BASE_LINK_TO_IR_SENSORS = 0.171  # base_link to front of bumper - ir range estimates are distance from front bumper to obstacle
 
 class IR2Scan_Node(Node):
 
@@ -109,6 +113,7 @@ class IR2Scan_Node(Node):
             namespace + '/scan',
             qos_profile_sensor_data)
         self.scan_msg = LaserScan( 
+            header = Header(frame_id = 'base_link'),
             angle_min=ANGLE_MIN, 
             angle_max=ANGLE_MAX, 
             angle_increment=ANGLE_INCREMENT,
@@ -124,18 +129,29 @@ class IR2Scan_Node(Node):
         # self.get_logger().info('ir_intensities: {}'.format(msg))
         self.ir_intensity_vector = msg  # readings[].value
 
+        """
         if DEBUG:
             # increment/roll msg counter to print only once per second
             if (self.ir_intensity_counter == 0):
                 printIR(self.ir_intensity_vector)
             self.ir_intensity_counter = (self.ir_intensity_counter + 1) % 62
-
+        """
 
     def scan_timer_callback(self):
-            # if DEBUG:  self.get_logger().info('Readings: {}'.format(self.ir_intensity_vector))
-            # self.scan_msg.ranges = self.ir_intensity_vector.readings
+            if DEBUG:  self.get_logger().info('self.ir_intensity_vector: {}'.format(self.ir_intensity_vector.readings))
+            self.scan_msg.header.stamp = self.ir_intensity_vector.header.stamp
+            for idx in range(len(self.ir_intensity_vector.readings)):
+                ir_sensor_dist = create3_ir_dist.dist_ir_reading(idx,self.ir_intensity_vector.readings[idx].value)
+                self.scan_msg.ranges[IR_SENSOR_RANGES_INDEX[idx]] = ir_sensor_dist + BASE_LINK_TO_IR_SENSORS
+                if DEBUG:  
+                     self.get_logger().info('{:>20}: reading: {:>4} dist: {:>8.3f} ranges[{:>3}]:{:>8.3f}'.format(
+                           IR_SENSOR_LABELS[idx], self.ir_intensity_vector.readings[idx].value, ir_sensor_dist,
+                           IR_SENSOR_RANGES_INDEX[idx], self.scan_msg.ranges[IR_SENSOR_RANGES_INDEX[idx]]))
+            if (len(self.ir_intensity_vector.readings)==0):
+                self.scan_msg.ranges=[0.0]*131
+                if DEBUG:  self.get_logger().info('zero length ir_intensity_vector seen')
             self.publisher.publish(self.scan_msg)
-            # if DEBUG:  self.get_logger().info('Published /scan: {}'.format(self.scan_msg))
+            if DEBUG:  self.get_logger().info('Published /scan: {}\n'.format(self.scan_msg))
 
 
 
