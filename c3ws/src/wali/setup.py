@@ -1,4 +1,6 @@
 from setuptools import setup
+from glob import glob
+import os
 
 package_name = 'wali'
 
@@ -11,6 +13,10 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('lib/' + package_name, [package_name+'/create3_ir_dist.py']),
+        # Include all launch files
+        (os.path.join('share', package_name), glob('launch/*.py')),
+        # Include all urdf files
+        (os.path.join('share', package_name), glob('urdf/*.urdf*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
