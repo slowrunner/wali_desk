@@ -9,7 +9,7 @@ git pull
 echo "Using vsc to update additional dependencies to workspace"
 # Use vcs to update additional dependencies into the workspace (gazebo not on galactic yet)
 cd ~/wali_desk/c3ws
-vcs import ~/wali_desk/c3ws/src/ < ~/wali_desk/c3ws/src/create3_sim/dependencies.repos
+# vcs import ~/wali_desk/c3ws/src/ < ~/wali_desk/c3ws/src/create3_sim/dependencies.repos
 
 echo "Checking for ROS2 dependencies"
 cd ~/wali_desk/c3ws
