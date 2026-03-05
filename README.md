@@ -1,4 +1,4 @@
-# WaLI Desk
+# WaLI Desk (pre TB5-WaLI WaLI)
 
 Humble ROS 2 Desktop Environment for robot WaLI  
 "Wall follower Looking for Intelligence"  
